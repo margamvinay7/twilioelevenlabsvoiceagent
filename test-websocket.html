@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .log { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 WebSocket Connection Test</h1>
+        <p>Test WebSocket connection to your server</p>
+        
+        <div>
+            <input type="text" id="wsUrl" placeholder="ws://localhost:3001/ws" value="ws://localhost:3001/ws" style="width: 300px; padding: 5px;">
+            <button onclick="connect()">Connect</button>
+            <button onclick="disconnect()">Disconnect</button>
+            <button onclick="sendTest()">Send Test Message</button>
+        </div>
+        
+        <div class="log" id="log">
+            <div class="info">Ready to test WebSocket connection</div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function connect() {
+            const url = document.getElementById('wsUrl').value;
+            if (!url) {
+                log('Please enter WebSocket URL', 'error');
+                return;
+            }
+            
+            try {
+                log(`Connecting to ${url}...`, 'info');
+                ws = new WebSocket(url);
+                
+                ws.onopen = function() {
+                    log('✅ WebSocket connected successfully!', 'success');
+                };
+                
+                ws.onmessage = function(event) {
+                    log(`📨 Received: ${event.data}`, 'info');
+                };
+                
+                ws.onclose = function(event) {
+                    log(`❌ WebSocket closed: ${event.code} - ${event.reason}`, 'error');
+                };
+                
+                ws.onerror = function(error) {
+                    log(`❌ WebSocket error: ${error}`, 'error');
+                };
+                
+            } catch (error) {
+                log(`❌ Connection failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+                log('WebSocket disconnected', 'info');
+            }
+        }
+        
+        function sendTest() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const testMessage = {
+                    event: 'test',
+                    message: 'Hello from test client',
+                    timestamp: new Date().toISOString()
+                };
+                ws.send(JSON.stringify(testMessage));
+                log(`📤 Sent test message: ${JSON.stringify(testMessage)}`, 'info');
+            } else {
+                log('WebSocket not connected', 'error');
+            }
+        }
+        
+        // Auto-connect on load
+        window.onload = function() {
+            setTimeout(() => {
+                log('Auto-connecting to WebSocket...', 'info');
+                connect();
+                
+                // Also test the specific path Twilio will use
+                setTimeout(() => {
+                    log('Testing Twilio-specific WebSocket path...', 'info');
+                    const twilioWsUrl = document.getElementById('wsUrl').value.replace('/ws', '/ws');
+                    log(`Twilio will connect to: ${twilioWsUrl}`, 'info');
+                }, 2000);
+            }, 1000);
+        };
+    </script>
+</body>
+</html> 

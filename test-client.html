@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple AI Call Client</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    .log {
+      margin-top: 15px;
+      font-family: monospace;
+      font-size: 14px;
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📞 Simple AI Call Client</h2>
+
+    <label>Server URL:</label>
+    <input type="text" id="serverUrl" value="https://6025954369ae.ngrok-free.app">
+
+    <label>Phone Number:</label>
+    <input type="tel" id="phoneNumber" value="+917569986538">
+
+    <button onclick="startCall()">Start Call</button>
+
+    <div class="log" id="log">Logs will appear here...</div>
+  </div>
+
+  <script>
+    function log(msg) {
+      const logDiv = document.getElementById("log");
+      const entry = document.createElement("div");
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    async function startCall() {
+      const serverUrl = document.getElementById("serverUrl").value;
+      const phoneNumber = document.getElementById("phoneNumber").value;
+
+      if (!serverUrl || !phoneNumber) {
+        alert("Please enter server URL and phone number");
+        return;
+      }
+
+      log(`Calling ${phoneNumber} via ${serverUrl}...`);
+
+      try {
+        const response = await fetch(`${serverUrl}/call`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ to: phoneNumber })
+        });
+
+        const result = await response.json();
+        if (result.ok) {
+          log(`✅ Call started successfully. Call SID: ${result.callSid}`);
+        } else {
+          log(`❌ Failed to start call: ${result.error || 'Unknown error'}`);
+        }
+      } catch (err) {
+        log(`❌ Error: ${err.message}`);
+      }
+    }
+  </script>
+</body>
+</html>
