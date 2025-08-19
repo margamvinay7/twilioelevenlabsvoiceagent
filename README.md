@@ -1,4 +1,4 @@
-# 🤖 AI Voice Agent for Telecom Sales
+# 🤖 AI Voice Agent for Customer Service
 
 A real-time AI voice agent that can make outbound calls and have natural conversations with customers for telecom sales and recharge offers.
 
